@@ -58,6 +58,8 @@ test_labels <- as.factor(test_csv[, features])
 #factor(c(1), levels = c(2, 1), labels = c("female", "male"))
 #as.factor(test_csv[, features])
 
+fitControl <- trainControl(method = "cv",
+                           number = 10)
 
 # Train the model
 model <- train(train_data, train_labels, 
