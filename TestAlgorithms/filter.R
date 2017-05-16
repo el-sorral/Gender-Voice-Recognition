@@ -21,15 +21,15 @@ filter_csv <- function(csv) {
     csv[9], # selected
     # csv[10],
     csv[11], # selected
-    csv[12],
+    #csv[12],
     csv[13], # selected
     # csv[14],
     # csv[15],
-    csv[16],
+    #csv[16],
     # csv[17],
     csv[18], # selected
     # csv[19],
-    csv[20],
+    #csv[20],
     csv[21] # label
   ));
 }
@@ -45,7 +45,7 @@ trainIndex <- createDataPartition(train_csv_full$V21, p = .8,
 # test_csv  <- train_csv_full[-trainIndex,]
 
 train_csv  <- filter_csv(read.csv("./voice.csv", head = FALSE))
-test_csv  <- filter_csv(read.csv("./out.csv", head = FALSE))
+test_csv  <- filter_csv(read.csv("./6_male_6_female.csv", head = FALSE))
 
 # Prepare train data
 train_data <- train_csv[,-features]
@@ -54,8 +54,9 @@ train_labels <- as.factor(train_csv[, features])
 # Prepare test data
 features <- ncol(test_csv)
 test_data <- test_csv[, -features]
-test_labels <- as.factor(test_csv[, features])
-#factor(c(1), levels = c(2, 1), labels = c("female", "male"))
+test_labels <- 
+  as.factor(test_csv[, features])
+  #factor(c(2), levels = c(2, 1), labels = c("female", "male"))
 #as.factor(test_csv[, features])
 
 fitControl <- trainControl(method = "cv",
