@@ -21,15 +21,15 @@ filter_csv <- function(csv) {
     csv[9], # selected
     # csv[10],
     csv[11], # selected
-    # csv[12],
+    csv[12],
     csv[13], # selected
     # csv[14],
     # csv[15],
-    # csv[16],
+    csv[16],
     # csv[17],
     csv[18], # selected
     # csv[19],
-    # csv[20],
+    csv[20],
     csv[21] # label
   ));
 }
@@ -41,11 +41,11 @@ trainIndex <- createDataPartition(train_csv_full$V21, p = .8,
                                   list = FALSE, 
                                   times = 1)
 
-train_csv <- train_csv_full[ trainIndex,]
-test_csv  <- train_csv_full[-trainIndex,]
+# train_csv <- train_csv_full[ trainIndex,]
+# test_csv  <- train_csv_full[-trainIndex,]
 
-#test_csv  <- filter_csv(read.csv("./test.csv", head = FALSE))
-
+train_csv  <- filter_csv(read.csv("./voice.csv", head = FALSE))
+test_csv  <- filter_csv(read.csv("./out.csv", head = FALSE))
 
 # Prepare train data
 train_data <- train_csv[,-features]
@@ -58,22 +58,14 @@ test_labels <- as.factor(test_csv[, features])
 #factor(c(1), levels = c(2, 1), labels = c("female", "male"))
 #as.factor(test_csv[, features])
 
-fitControl <- trainControl(method = "cv",
-                           number = 10)
 
 # Train the model
 model <- train(train_data, train_labels, 
                trControl = fitControl,
-               method = "svmRadial")
+               method = "nnet")
 
 print.train(model)
 plot.train(model)
-
-
-#partGrid <- expand.grid(cp = (0:10)*0.01)
-#knnGrid <- expand.grid(k = 1:5)
-#grid <- expand.grid(k= 1:5, cp = (0:5)*0.1)
-
 
 # Predict values
 predictions <- predict(model, test_data)
