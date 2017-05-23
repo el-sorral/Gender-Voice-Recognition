@@ -15,6 +15,10 @@ library(doParallel);
 set.seed(1);
 
 
+cl <- makeCluster(detectCores() - 1)
+registerDoParallel(cl)
+
+
 extract_features <-function (file) {
   cat("Reading file", file, "\n")
   gender <- "male";
@@ -24,7 +28,7 @@ extract_features <-function (file) {
   threshold <- 5;
   parallel <- 1;
   
-  r <- tuneR::readWave(file, from=0, units = "seconds");
+  r <- tuneR::readWave(paste("uploads/", file, sep = ""), from=0, units = "seconds");
 
   b<- bp #in case bp its higher than can be due to sampling rate
   if(b[2] > ceiling(r@samp.rate/2000) - 1) b[2] <- ceiling(r@samp.rate/2000) - 1;
@@ -75,14 +79,6 @@ extract_features <-function (file) {
   if(mindom==maxdom) modindx<-0 else modindx <- mean(changes, na.rm = T)/dfrange;
   
   wave <<- r;
-  
-  #save results
-  ret <- (c(duration, meanfreq, sd, median, Q25, Q75, IQR, skew, kurt, sp.ent, sfm, mode, 
-            centroid, peakf, meanfun, minfun, maxfun, meandom, mindom, maxdom, dfrange, modindx));
-  
-  v <- paste(as.character(c(meanfreq, sd, median, Q25, Q75, IQR, skew, kurt, sp.ent, sfm, mode, 
-                            centroid, meanfun, minfun, maxfun, meandom, mindom, maxdom, dfrange, modindx,
-                            gender)), collapse=",");
 
   data <- data.frame(meanfreq, sd, median, Q25, Q75, IQR, skew, kurt, sp.ent, sfm, mode, 
                     centroid, meanfun, minfun, maxfun, meandom, mindom, maxdom, dfrange, modindx,
@@ -93,44 +89,75 @@ extract_features <-function (file) {
 }
 
 
-predict_gender <- function(features) {
-  cl <- makeCluster(detectCores() - 1)
-  registerDoParallel(cl)
+filter_csv <- function(csv) {
+  return(data.frame(
+    # csv[1],
+    csv[2], # selected
+    csv[3], # selected
+    # csv[4],
+    # csv[5],
+    # csv[6],
+    # csv[7],
+    # csv[8],
+    csv[9], # selected
+    # csv[10],
+    csv[11], # selected
+    #csv[12],
+    csv[13], # selected
+    # csv[14],
+    # csv[15],
+    #csv[16],
+    # csv[17],
+    csv[18], # selected
+    # csv[19],
+    #csv[20],
+    csv[21] # label
+  ));
+}
+
+
+predict_gender <- function(con, data) {
   
-  filter_csv <- function(csv) {
-    return(data.frame(
-      # csv[1],
-      csv[2], # selected
-      csv[3], # selected
-      # csv[4],
-      # csv[5],
-      # csv[6],
-      # csv[7],
-      # csv[8],
-      csv[9], # selected
-      # csv[10],
-      csv[11], # selected
-      #csv[12],
-      csv[13], # selected
-      # csv[14],
-      # csv[15],
-      #csv[16],
-      # csv[17],
-      csv[18], # selected
-      # csv[19],
-      #csv[20],
-      csv[21] # label
-    ));
-  }
-  #test_csv  <- filter_csv(read.csv("./TestAlgorithms/test.csv", head = FALSE))
-  print(features);
+  file <- data[1];
+  features <- extract_features(file);
   fFeatures = filter_csv(features)
   nFeatures <- ncol(fFeatures)
   test_data <- fFeatures[, -nFeatures]
   
   model = readRDS("model.rds");
-  predictions <- predict(model, test_data)
-  return(as.character(predictions[1]))
+  predictions <- predict(model, test_data);
+  gender = as.character(predictions[1]);
+  writeLines(gender, con);
+}
+
+
+store_gender <- function (con, data) {
+  file <- data[1];
+  gender <- data[2];
+
+  if(gender %in% c("male", "female")) {
+    features <- extract_features(file);
+    features[21] = gender;
+    write.table(features, paste("uploads/", file, ".csv", sep = ""), 
+              row.names=FALSE, col.names=FALSE, sep=",");
+  }
+}
+
+
+handle_socket <- function(con) {
+
+  data <- readLines(con, 1);
+  writeLines(paste("Message receiver:", data));
+  pData <- strsplit(data, " ")[[1]];
+  method <- pData[1];
+
+  if(method == "predict") {
+    predict_gender(con, pData[-1]);
+  } else if(method == "store") {
+    store_gender(con, pData[-1]);
+  }
+
+  close(con);
 }
 
 
@@ -140,14 +167,7 @@ server <- function() {
     tryCatch({
       con <- socketConnection(host="0.0.0.0", port = 5001, blocking = TRUE,
                               server=TRUE);
-
-      print("HELLO");
-      data <- readLines(con, 1);
-      features <- extract_features(data);
-      response <- predict_gender(features);
-      writeLines(response, con);
-
-      close(con);
+      handle_socket(con)
     }, error= function(err) {
       writeLines(paste("Connection timeout. Open another socket.", err));
     })
