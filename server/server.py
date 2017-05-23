@@ -1,5 +1,8 @@
 import os
 import subprocess
+import socket
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 from flask import Flask, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
@@ -52,18 +55,27 @@ def uploaded_file(filename):
 
 
 def predict(filename):
-    generate_csv(filename)
-    bashCommand = "Rscript predict.R 2> /dev/null"
-    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
-    output, error = process.communicate()
-    return output
+    client_socket.connect(('10.42.0.66', 5001))
+    client_socket.send('man.wav' + '\n')
+    return client_socket.recv(2048)
 
 
-def generate_csv(filename):
-    bashCommand = "Rscript extractor.R uploads/" + filename + " female 2> /dev/null > test.csv"
-    with open('test.csv', 'w') as outfile:
-        subprocess.call(bashCommand.split(), stdout=outfile)
+# def predict(filename):
+# generate_csv(filename)
+# bashCommand = "Rscript predict.R 2> /dev/null"
+# process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+# output, error = process.communicate()
+# return output
+
+
+# def generate_csv(filename):
+#     bashCommand = "Rscript extractor.R uploads/" + filename + " female 2> /dev/null > test.csv"
+#     with open('test.csv', 'w') as outfile:
+#         subprocess.call(bashCommand.split(), stdout=outfile)
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(
+        host=app.config.get("HOST", "0.0.0.0"),
+        port=app.config.get("PORT", 5000)
+    )
