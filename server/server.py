@@ -2,7 +2,6 @@ import os
 import subprocess
 import socket
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 from flask import Flask, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
 
@@ -23,6 +22,13 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+@app.route('/verify', methods=['POST'])
+def verify_gender():
+    filename = request.form.get('filename')
+    gender = request.form.get('gender')
+    return generate_file_csv(filename, gender)
+
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -37,7 +43,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             gender = predict(filename)
-            return gender[5:-2]
+            return gender[:-1]
     return '''
         <!doctype html>
         <title>Upload new File</title>
@@ -55,9 +61,20 @@ def uploaded_file(filename):
 
 
 def predict(filename):
-    client_socket.connect(('10.42.0.66', 5001))
-    client_socket.send('man.wav' + '\n')
-    return client_socket.recv(2048)
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('localhost', 5001))
+    client_socket.send('predict ' + filename + '\n')
+    data = client_socket.recv(2048)
+    client_socket.close()
+    return data
+
+
+def generate_file_csv(filename, gender):
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect(('localhost', 5001))
+    client_socket.send('store ' + filename + ' ' + gender + '\n')
+    client_socket.close()
+    return 'stored'
 
 
 # def predict(filename):

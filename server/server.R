@@ -3,6 +3,9 @@
 #  install.packages(setdiff(packages, rownames(installed.packages())))  
 #}
 
+# .libPaths( c(.libPaths(),"/home/gerard/R/x86_64-pc-linux-gnu-library/3.3"));
+
+
 library(tuneR);
 library(seewave);
 library(gbm);
