@@ -1,0 +1,21 @@
+version: '2'
+services:
+
+  python:
+    image: genderizer-python
+    ports:
+      - "5000:5000"
+    environment:
+      - RSERVER_HOST=rscript
+    volumes:
+      - "./uploads:/usr/src/app/uploads"
+#    links:
+#      - rscript:rscript
+
+  rscript:
+    image: genderizer-r
+    ports:
+      - "5001:5001"
+    volumes:
+      - "./uploads:/usr/local/src/myscripts/uploads"
+      - "./model.rds:/usr/local/src/myscripts/model.rds"

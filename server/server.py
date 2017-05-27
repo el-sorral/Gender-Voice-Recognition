@@ -1,9 +1,13 @@
 import os
-import subprocess
 import socket
 
-from flask import Flask, request, redirect, url_for, send_from_directory
+from flask import Flask, request, redirect, send_from_directory, flash
 from werkzeug.utils import secure_filename
+
+RSERVER_HOST = os.getenv('RSERVER_HOST', 'localhost')
+print "hola"
+print RSERVER_HOST
+RSERVER_PORT = 5001
 
 UPLOAD_FOLDER = './uploads'
 ALLOWED_EXTENSIONS = set(['wav'])
@@ -62,7 +66,7 @@ def uploaded_file(filename):
 
 def predict(filename):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(('localhost', 5001))
+    client_socket.connect((RSERVER_HOST, RSERVER_PORT))
     client_socket.send('predict ' + filename + '\n')
     data = client_socket.recv(2048)
     client_socket.close()
@@ -71,7 +75,7 @@ def predict(filename):
 
 def generate_file_csv(filename, gender):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(('localhost', 5001))
+    client_socket.connect((RSERVER_HOST, RSERVER_PORT))
     client_socket.send('store ' + filename + ' ' + gender + '\n')
     client_socket.close()
     return 'stored'
