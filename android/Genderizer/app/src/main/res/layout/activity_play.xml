@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="edu.upc.eetac.bigdata.genderizer.MainActivity">
+
+
+    <TextView
+        android:id="@+id/progressText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:gravity="center"
+        android:padding="10dp"
+        android:text="Analyzing your voice... wait a bit"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/progressText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="39dp"></ProgressBar>
+
+    <ImageView
+        android:id="@+id/image_female"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/progressText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:src="@drawable/gender_female"
+        android:tint="@color/colorAccent"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/image_male"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/progressText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="35dp"
+        android:src="@drawable/gender_male"
+        android:tint="@color/colorPrimaryDark"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/share_results"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="14dp"
+        android:clickable="true"
+        android:gravity="center"
+        android:text="Help us with sharing your results!"
+        android:visibility="gone" />
+
+
+</RelativeLayout>
