@@ -20,7 +20,8 @@ import okhttp3.Response;
 
 public class NetworkService {
 
-    private static final String URL = "http://srv.birium.com:5000/";
+    private static final String URL = "http://geminis.aaaida.com:5000/";
+//    private static final String URL = "http://srv.birium.com:5000/";
 //    private static final String URL = "http://10.42.0.1:5000/";
     private static final MediaType MEDIA_TYPE_WAV = MediaType.parse("audio/wav");
     private final OkHttpClient client;
